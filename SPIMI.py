@@ -17,7 +17,7 @@ def CleanData(raw):
     raw = re.sub(r"[^A-Za-z0-9\s]", " ", raw)
     raw = raw.split()
     wnl = WordNetLemmatizer()
-    for word in set(raw):
+    for word in raw:
         word = word.lower()
         word = wnl.lemmatize(word) #词形还原
         if word in stopwords.words('english'):

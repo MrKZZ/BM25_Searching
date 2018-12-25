@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import BM25
 import os
-
+from SPIMI import CleanData
 app = Flask(__name__)
 
 
@@ -13,20 +13,25 @@ def hello_world():
 @app.route('/search/', methods=['POST'])  # get，post方法是由浏览器提交给下一进程的方法
 def search():
     global bm25, w_qd, page, docs, query
-    try:
-        checked = ['checked="true"', '', '']
-        query = request.form['key_word']
-        if query is not '':
-            bm25, w_qd = BM25.Level_search(dic, dic_level, query)
-            page, docs = Page_Docs(w_qd, flag=False)
-            docs_ = docs[:10]
-            page_ = page[:10]
-            return render_template('search.html', checked=checked, key=query, docs=docs_, page=page_,
-                                   error=True)
-        else:
-            return render_template('search.html', error=False)
-    except:
-        print('search error')
+    # try:
+    checked = ['checked="true"', '', '']
+    query = request.form['key_word']
+    query = CleanData(query)
+    temp = query.split()
+    querys = {}
+    for (i,e) in enumerate(temp):
+        querys[i] = e
+    if querys is not dict():
+        bm25, w_qd = BM25.Level_search(dic, dic_level, querys)
+        page, docs = Page_Docs(w_qd, flag=False)
+        docs_ = docs[:10]
+        page_ = page[:10]
+        return render_template('search.html', checked=checked, key=query, docs=docs_, page=page_,
+                               error=True)
+    else:
+        return render_template('search.html', error=False)
+    # except:
+    #     print('search error')
 
 # 根据回传id查找文件
 @app.route('/search/<id>/', methods=['GET'])
@@ -88,4 +93,4 @@ if __name__ == '__main__':
     docs = []
     query = ''
     doc_id = []
-    app.run(debug=False)
+    app.run(debug=True)
